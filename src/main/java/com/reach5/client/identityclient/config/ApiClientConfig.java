@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.client.support.BasicAuthenticationInterceptor;
+import org.springframework.http.client.support.BasicAuthorizationInterceptor;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
@@ -27,8 +29,18 @@ public class ApiClientConfig {
         return restTemplate;
     }
 
+    public RestTemplate reach5RestTemplateWithBasicAuthorization () {
+        RestTemplate restTemplate = new RestTemplate(getClientHttpRequestFactory());
+        restTemplate.setUriTemplateHandler(new DefaultUriBuilderFactory(apiClientConfigProperties.getReach5().getBaseUrl()));
+        restTemplate.setErrorHandler(restTemplateResponseErrorHandler);
+        restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(
+                apiClientConfigProperties.getReach5().getClientId(),
+                apiClientConfigProperties.getReach5().getClientSecret()));
+        return restTemplate;
+    }
+
     private ClientHttpRequestFactory getClientHttpRequestFactory() {
-        int timeout = 5000;
+        int timeout = apiClientConfigProperties.getReach5().getTimeout();
         RequestConfig config = RequestConfig.custom()
                 .setConnectTimeout(timeout)
                 .setConnectionRequestTimeout(timeout)

@@ -31,30 +31,33 @@ public class Reach5IdentityApiClientTest {
     MockRestServiceServer server;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    ApiClientConfigProperties properties;
+
+    @Autowired
+    ObjectMapper objectMapper;
 
     @Test
     public void can_create_user() throws JsonProcessingException {
-        server.expect(MockRestRequestMatchers.requestTo("/identity/v1/passwordless/start"))
+        server.expect(MockRestRequestMatchers.requestTo(properties.getReach5().getBaseUrl() + "/identity/v1/passwordless/start"))
                 .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
                 .andExpect(MockRestRequestMatchers.content().json(objectMapper.writeValueAsString(mockPasswordlessBody())))
                 .andRespond(MockRestResponseCreators.withNoContent());
 
-        reach5IdentityApiClient.createClientPasswordLess(mockPasswordlessBody());
+        reach5IdentityApiClient.createUserPasswordLess(mockPasswordlessBody());
     }
 
     @Test(expected = UnhandledException.class)
     public void cannot_create_user_error_server() throws JsonProcessingException {
-        server.expect(MockRestRequestMatchers.requestTo("/identity/v1/passwordless/start"))
+        server.expect(MockRestRequestMatchers.requestTo(properties.getReach5().getBaseUrl() + "/identity/v1/passwordless/start"))
                 .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
                 .andRespond(MockRestResponseCreators.withStatus(HttpStatus.SERVICE_UNAVAILABLE));
 
-        reach5IdentityApiClient.createClientPasswordLess(mockPasswordlessBody());
+        reach5IdentityApiClient.createUserPasswordLess(mockPasswordlessBody());
     }
 
     public PasswordlessBody mockPasswordlessBody() {
         return PasswordlessBody.builder()
-                .client_id("xxx")
+                .client_id(properties.getReach5().getClientId())
                 .scope("openid profile email phone")
                 .authType("magic_link")
                 .email("test-passwordless@test.com")

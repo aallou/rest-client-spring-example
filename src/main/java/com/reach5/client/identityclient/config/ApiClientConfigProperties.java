@@ -12,8 +12,12 @@ public class ApiClientConfigProperties {
     Reach5 reach5;
 
     @Data
-    static class Reach5 {
+    public static class Reach5 {
         private String baseUrl;
+        private String clientId;
+        private String clientSecret;
+        private Integer timeout;
+        private String tokenUrl;
     }
 
 }
